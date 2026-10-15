@@ -1,0 +1,25 @@
+[package]
+name = "packflow-core"
+version = "0.3.0"
+edition = "2021"
+
+[features]
+preview-server = ["dep:tiny_http"]
+
+[dependencies]
+rusqlite = { version = "=0.40.2", features = ["bundled", "backup"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+sha2 = "0.10"
+tempfile = "3"
+argon2 = "0.5"
+tiny_http = { version = "0.12", optional = true }
+
+[dev-dependencies]
+
+[[bin]]
+name = "packflow-preview"
+path = "src/bin/preview.rs"
+required-features = ["preview-server"]

@@ -1,0 +1,19 @@
+handoff/
+UI_screenshots/
+*.xlsx
+*.xls
+*.sqlite*
+*.db
+*.pfbackup
+.env
+.env.*
+!.env.example
+**/node_modules/
+**/target/
+**/dist/
+**/.dev-data/
+**/test-results/
+**/playwright-report/
+**/.private-notes/
+# Local source-workbook analysis; not required to build the app.
+PackFlow/planning/SALARIES_WORKBOOK_REVIEW.md

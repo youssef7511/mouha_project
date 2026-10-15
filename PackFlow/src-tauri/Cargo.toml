@@ -1,0 +1,22 @@
+[package]
+name = "packflow-desktop"
+version = "0.3.0"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "=2.12.3", features = [] }
+tauri-plugin-single-instance = "=2.5.3"
+packflow-core = { path = "../crates/packflow-core" }
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+rfd = "0.15.4"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "=3.6.3", features = ["apple-native"] }
+
+[lib]
+name = "packflow_desktop"
+crate-type = ["staticlib", "cdylib", "rlib"]

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+target/
+.dev-data/
+src-tauri/gen/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+.env.local
+test-results/
+playwright-report/

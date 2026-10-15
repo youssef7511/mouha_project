@@ -1,0 +1,6 @@
+* text=auto eol=lf
+# Migration checksums cover the original bytes; never normalize applied SQL.
+PackFlow/crates/packflow-core/migrations/*.sql -text whitespace=cr-at-eol
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

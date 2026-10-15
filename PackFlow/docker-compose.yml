@@ -1,0 +1,61 @@
+services:
+  core:
+    image: rust:1.99-bookworm
+    working_dir: /workspace
+    command: cargo run --locked -p packflow-core --features preview-server --bin packflow-preview
+    environment:
+      PACKFLOW_DATA_DIR: /data
+      PACKFLOW_PREVIEW_BIND: 0.0.0.0:4318
+      CARGO_TARGET_DIR: /build
+    ports:
+      - "127.0.0.1:4318:4318"
+    volumes:
+      - .:/workspace
+      - ./.dev-data:/data
+      - packflow-cargo:/usr/local/cargo/registry
+      - packflow-build:/build
+  core-test:
+    image: rust:1.99-bookworm
+    working_dir: /workspace
+    command: cargo test --locked -p packflow-core
+    environment:
+      CARGO_TARGET_DIR: /build
+    volumes:
+      - .:/workspace
+      - packflow-cargo:/usr/local/cargo/registry
+      - packflow-build:/build
+    profiles: [test]
+  core-e2e:
+    image: rust:1.99-bookworm
+    working_dir: /workspace
+    command: cargo run --locked -p packflow-core --features preview-server --bin packflow-preview
+    environment:
+      PACKFLOW_DATA_DIR: /test-data
+      PACKFLOW_TEST_NO_AUTH: "1"
+      PACKFLOW_PREVIEW_BIND: 0.0.0.0:4318
+      CARGO_TARGET_DIR: /build
+    ports:
+      - "127.0.0.1:4319:4318"
+    tmpfs: [/test-data]
+    volumes:
+      - .:/workspace
+      - packflow-cargo:/usr/local/cargo/registry
+      - packflow-build:/build
+    profiles: [test]
+  native-check:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.native-check
+    working_dir: /workspace
+    command: cargo check --locked -p packflow-desktop
+    environment:
+      CARGO_TARGET_DIR: /build-native
+    volumes:
+      - .:/workspace
+      - packflow-cargo:/usr/local/cargo/registry
+      - packflow-native-build:/build-native
+    profiles: [test]
+volumes:
+  packflow-cargo:
+  packflow-build:
+  packflow-native-build:

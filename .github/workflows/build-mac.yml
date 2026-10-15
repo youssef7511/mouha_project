@@ -1,0 +1,95 @@
+name: Build Mac test installers
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['PackFlow/**', '.github/workflows/build-mac.yml', '.gitattributes', '.gitignore']
+  pull_request:
+    paths: ['PackFlow/**', '.github/workflows/build-mac.yml', '.gitattributes', '.gitignore']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mac-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14
+            label: AppleSilicon
+            arch: arm64
+          - runner: macos-15-intel
+            label: Intel
+            arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+        working-directory: PackFlow
+    env:
+      APPLE_SIGNING_IDENTITY: '-'
+      CARGO_INCREMENTAL: '0'
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: PackFlow/package-lock.json
+      - name: Verify host and pinned Rust toolchain
+        env:
+          EXPECTED_ARCH: ${{ matrix.arch }}
+        run: |
+          test "$(uname -m)" = "$EXPECTED_ARCH"
+          xcode-select -p
+          rustup show active-toolchain
+          rustc --version
+      - name: Reject private data in source
+        run: node scripts/check-release-data.mjs
+      - name: Rust formatting and core checks
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --locked -p packflow-core --all-targets -- -D warnings
+      - name: Test and build the native installer
+        run: bash scripts/mac-build.sh
+      - name: Verify packaged application and disk images
+        run: |
+          node scripts/check-release-data.mjs --bundle 'target/release/bundle/macos/PackFlow Test.app'
+          codesign --verify --deep --strict --verbose=2 'target/release/bundle/macos/PackFlow Test.app'
+          shopt -s nullglob
+          installers=(target/release/bundle/dmg/*.dmg)
+          test "${#installers[@]}" -gt 0
+          for installer in "${installers[@]}"; do
+            hdiutil verify "$installer"
+          done
+          cd target/release/bundle/dmg
+          shasum -a 256 ./*.dmg > SHA256SUMS.txt
+      - name: Upload test installer
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: PackFlow-macOS-${{ matrix.label }}-test
+          path: |
+            PackFlow/target/release/bundle/dmg/*.dmg
+            PackFlow/target/release/bundle/dmg/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+      - name: Explain acceptance status
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'SUMMARY'
+          Installer artifacts are private-test/ad-hoc signed, not notarized production releases.
+          A fresh install starts with no business records and requires owner-account setup.
+          Existing installations retain their local records and account.
+          Follow PackFlow/docs/MAC_HANDOFF.md on the friend's Mac before daily-use approval.
+          SUMMARY

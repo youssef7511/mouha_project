@@ -1,0 +1,4 @@
+[workspace]
+members = ["crates/packflow-core", "src-tauri"]
+default-members = ["crates/packflow-core"]
+resolver = "2"

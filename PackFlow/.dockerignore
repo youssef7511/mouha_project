@@ -1,0 +1,6 @@
+node_modules
+.dev-data
+target
+.git
+test-results
+playwright-report
