@@ -1,5 +1,11 @@
 # PackFlow — Mac test-build handoff
 
+## Startup permission fix — 15 October 2026
+
+The first installer built successfully but failed the real-Mac startup check at “Opening local account”. The native `auth`, `workspace_backup` and `workspace_restore` handlers were missing from the application command manifest and the main window capability. The replacement build declares and grants all five native handlers. A frontend test now checks that every handler is declared and granted; it runs during each installer build. Text IPC errors are also preserved on screen instead of being replaced by a generic message. Build success does not establish a successful real-Mac launch.
+
+Download the replacement installer from the workflow run containing `Fix native account and workspace command permissions`, quit the old app, and replace **PackFlow Test** in Applications. Keep the existing application data folder; reinstalling does not require deleting records or credentials. Retry first launch, account creation/login and backup/restore on the Mac. If startup still fails, capture the exact error now displayed.
+
 Reviewed 15 October 2026. Status: suitable for handing source to a Mac developer for a test build. Production release acceptance is incomplete; no Mac `.app` or `.dmg` has been built or run in this Windows workspace.
 
 ## Current evidence

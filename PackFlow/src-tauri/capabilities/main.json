@@ -3,5 +3,12 @@
   "identifier": "main",
   "description": "Local main window may call the typed PackFlow domain commands.",
   "windows": ["main"],
-  "permissions": ["core:default", "allow-query", "allow-mutate"]
+  "permissions": [
+    "core:default",
+    "allow-query",
+    "allow-mutate",
+    "allow-auth",
+    "allow-workspace-backup",
+    "allow-workspace-restore"
+  ]
 }

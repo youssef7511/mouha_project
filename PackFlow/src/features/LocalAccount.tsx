@@ -35,9 +35,11 @@ export async function nativeCommand<T>(name: string, args?: Record<string, unkno
     return result as T;
   } catch (e) {
     throw new Error(
-      typeof e === 'object' && e && 'message' in e
-        ? String(e.message)
-        : 'Could not complete the local operation.',
+      typeof e === 'string'
+        ? e
+        : typeof e === 'object' && e && 'message' in e
+          ? String(e.message)
+          : 'Could not complete the local operation.',
     );
   }
 }
