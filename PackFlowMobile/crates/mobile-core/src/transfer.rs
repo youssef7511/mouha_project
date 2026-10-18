@@ -5,6 +5,7 @@ use crate::{
 use chrono::{DateTime, FixedOffset, Utc};
 use packflow_transfer::Package;
 use serde_json::{json, Value};
+use std::collections::HashSet;
 impl Engine {
     pub fn transfer_bytes(&self, from: &str, to: &str) -> Result<Vec<u8>> {
         packflow_transfer::date(from).map_err(|e| DomainError::validation("from_date", &e))?;
@@ -25,9 +26,12 @@ impl Engine {
             Ok(d.as_str() >= from && d.as_str() <= to)
         };
         let payments=rows(&tx,"SELECT *,CAST(amount_fils AS TEXT) AS amount_fils FROM payments ORDER BY created_at,id",[])?;
+        let changed_entities:HashSet<String>=rows(&tx,"SELECT DISTINCT entity_id FROM audit WHERE date(created_at,'+3 hours') BETWEEN ?1 AND ?2",rusqlite::params![from,to])?.into_iter().map(|v|v["entity_id"].as_str().unwrap().to_owned()).collect();
         let mut orders = vec![];
         for mut o in rows(&tx, "SELECT * FROM orders ORDER BY created_at,id", [])? {
-            if changed(o["updated_at"].as_str().unwrap())?
+            if changed(o["created_at"].as_str().unwrap())?
+                || changed(o["updated_at"].as_str().unwrap())?
+                || changed_entities.contains(o["id"].as_str().unwrap())
                 || payments
                     .iter()
                     .filter(|p| p["order_id"] == o["id"])
@@ -40,7 +44,9 @@ impl Engine {
         let clients = rows(&tx, "SELECT * FROM clients ORDER BY created_at,id", [])?
             .into_iter()
             .filter(|c| {
-                changed(c["updated_at"].as_str().unwrap()).unwrap_or(false)
+                changed(c["created_at"].as_str().unwrap()).unwrap_or(false)
+                    || changed(c["updated_at"].as_str().unwrap()).unwrap_or(false)
+                    || changed_entities.contains(c["id"].as_str().unwrap())
                     || orders.iter().any(|o| o["client_id"] == c["id"])
             })
             .collect();

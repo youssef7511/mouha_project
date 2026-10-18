@@ -13,4 +13,6 @@ Automated browser and Rust tests are development evidence. Complete these checks
 - [ ] Update the signed application using the same identifier/team and verify existing local data survives. Do not uninstall to test an update; uninstalling removes application data.
 - [ ] Check device screen-lock protection, confirm the standalone balance disclaimer, and agree on external backup responsibility. This version has no app-specific login or automatic Mac transfer.
 
-For future transfer, keep independent phone and Mac entry procedures clear. Entering the same receipt on both creates two separate records today; neither app can detect that across devices yet.
+- [ ] Export a dated transfer workbook in Settings, locate/share it using Files, match clients in the Mac preview, import, and repeat the same workbook without duplicates. Verify Mac-stage changes appear as conflicts and Mac edits do not return to the phone.
+
+For manual transfer, keep independent phone and Mac entry procedures clear. Entering the same receipt on both creates two separate records today; neither app can detect that across devices yet.

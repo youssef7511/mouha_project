@@ -1,5 +1,13 @@
 # PackFlow — Mac test-build handoff
 
+## Phone transfer release 0.4.0 — 19 October 2026
+
+Install the new 0.4.0 test DMG over the existing **PackFlow Test** app using the same identifier; retain the local workspace/account. Schema 8 adds phone source mappings and import history, with a verified pre-upgrade snapshot when upgrading existing data. Fresh installers still contain no business/test records.
+
+Clients, Orders, Payments and Settings now expose **Import from phone**. Use the phone's Settings → Transfer to Mac workbook, match clients, preview the rows and import ready records. A `.pfbackup` safety copy is saved before each applied batch. Repeat the same file and verify it shows duplicates without creating more receipts/orders. On a test workspace, revise a phone quote and check safe updates; change Mac stage work and verify another phone revision is a conflict. Restore the safety backup to verify undo. Keep phone/Mac payment entry procedures separate: independently typed duplicates are not detected by source IDs.
+
+Source builds now require the sibling `PackFlowTransfer` and `PackFlowMobile` directories; clone/send the complete source repository. See [the transfer guide](../../PackFlowTransfer/README.md) for sheets, date semantics, limits and conflict handling. On the intended signed iPhone build, verify Files sharing exports the unchanged `.xlsx` and that the Mac can import it. No physical-iPhone acceptance is claimed by simulator checks.
+
 ## Excel export release 0.3.1 — 18 October 2026
 
 All nine data pages now expose **Export Excel**. See [EXCEL_EXPORT.md](EXCEL_EXPORT.md) for worksheets, filters, precision and correction treatment. Install the new 0.3.1 test DMG over the existing **PackFlow Test** application; the identifier/data directory/account are unchanged. Verify Excel export from each page on the Mac, cancel a save, save to a normal folder, reject an unwritable location, and open a file in Excel or Numbers to inspect KWD amounts and Arabic descriptions. Existing business data remains local; installers continue to start empty on a fresh device.

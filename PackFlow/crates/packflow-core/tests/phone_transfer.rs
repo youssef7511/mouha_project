@@ -317,6 +317,26 @@ fn transfer_distinguishes_unpriced_quote_and_explicit_zero_with_customer_credit(
     assert_eq!(o["order"]["total_due_fils"], "0");
     assert_eq!(o["order"]["balance_fils"], "-10000");
 }
+
+#[test]
+fn export_period_selects_creation_and_historical_edits_even_after_later_updates() {
+    let (dir, p, _m, _c, _id) = fixture();
+    let sql = rusqlite::Connection::open(dir.path().join("phone.sqlite")).unwrap();
+    sql.execute_batch("UPDATE clients SET created_at='2026-01-02T10:00:00Z',updated_at='2026-11-02T10:00:00Z';UPDATE orders SET created_at='2026-01-02T10:00:00Z',updated_at='2026-11-02T10:00:00Z';UPDATE payments SET created_at='2026-11-02T10:00:00Z';UPDATE audit SET created_at='2026-01-02T22:30:00Z'").unwrap();
+    drop(sql);
+    for day in ["2026-01-02", "2026-01-03"] {
+        let package =
+            packflow_transfer::Package::decode(&p.transfer_bytes(day, day).unwrap()).unwrap();
+        assert_eq!(package.orders.len(), 1);
+        assert_eq!(package.clients.len(), 1);
+        assert_eq!(package.payments.len(), 1);
+    }
+    let empty =
+        packflow_transfer::Package::decode(&p.transfer_bytes("2026-01-04", "2026-01-04").unwrap())
+            .unwrap();
+    assert!(empty.orders.is_empty());
+    assert!(empty.clients.is_empty());
+}
 #[test]
 fn dated_export_carries_older_client_order_and_original_receipt_and_restore_undoes_import() {
     let (dir, mut p, mut m, c, source) = fixture();

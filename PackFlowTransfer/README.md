@@ -25,7 +25,7 @@ The fixed column definitions are in `src/lib.rs`. Limits: 8 MiB compressed file,
 
 ## Date selection and dependencies
 
-The selected period uses the Kuwait calendar date of creation/update on the phone. It selects changed clients and orders, including orders with new receipts/corrections. A selected order brings its client, every current box/stage price, all its receipts and corrections, and its source quote history, even if those related records are older than the range. The workbook is a complete related snapshot, not a period-only balance report. A backdated payment entered today is selected by today's creation date.
+The selected period uses the Kuwait calendar date of creation/update on the phone. It selects changed clients and orders, including orders with new receipts/corrections. A selected order brings its client, every current box/stage price, all its receipts and corrections, and its source quote history, even if those related records are older than the range. The workbook is a complete related snapshot, not a period-only balance report. A backdated payment entered today is selected by today's creation date. Creation and audit history select records even if they were edited again after the selected period. Exported values are the latest saved snapshot at export time, not an as-of-period reconstruction.
 
 ## Import semantics
 
