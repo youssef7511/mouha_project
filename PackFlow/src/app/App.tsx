@@ -1,4 +1,5 @@
 import { WorkspaceSafety } from '../features/LocalAccount';
+import { PhoneImportButton } from '../features/PhoneImport';
 import {
   ExcelExportButton,
   ExcelFilters,
@@ -260,6 +261,9 @@ function Workspace({ exportFilters }: { exportFilters: ExportRequest | null }) {
             <strong>{navigation.find((n) => n[0] === page)?.[1]}</strong>
           </div>
           <div className="top-actions">
+            {['clients', 'orders', 'payments', 'settings'].includes(page) && (
+              <PhoneImportButton key={`import-${page}`} disabled={!data} />
+            )}
             <ExcelExportButton
               key={page}
               disabled={!data}
@@ -462,7 +466,7 @@ function Workspace({ exportFilters }: { exportFilters: ExportRequest | null }) {
                               <p>{o.client_name}</p>
                               <div className="card-meta">
                                 <strong>{o.ordered_boxes.toLocaleString()} boxes</strong>
-                                <span>Due {o.due_date}</span>
+                                <span>{o.due_date ? `Due ${o.due_date}` : 'Due date not set'}</span>
                               </div>
                               <Progress done={o.completed_stages} total={o.stage_count} />
                               <div className="card-footer">
@@ -857,7 +861,7 @@ function OrderTable({ orders, onPick }: { orders: OrderSummary[]; onPick: (id: s
               <td>
                 <Progress done={o.completed_stages} total={o.stage_count} />
               </td>
-              <td>{o.due_date}</td>
+              <td>{o.due_date || 'Not set'}</td>
             </tr>
           ))}
         </tbody>
@@ -873,8 +877,15 @@ function OrderPanel({ detail, onStage }: { detail: OrderDetail; onStage: (id: st
         <span className="eyebrow">{detail.order.number}</span>
         <h2>{detail.order.name}</h2>
         <p>
-          {detail.order.client_name} · Due {detail.order.due_date}
+          {detail.order.client_name} ·{' '}
+          {detail.order.due_date ? `Due ${detail.order.due_date}` : 'Due date not set'}
         </p>
+        {detail.mobile_source && (
+          <p className="form-note">
+            From phone {detail.mobile_source.number} · phone revision{' '}
+            {detail.mobile_source.source_version}
+          </p>
+        )}
         <div className="mini-stats">
           <div>
             <small>Customer total</small>

@@ -208,7 +208,7 @@ fn salary_migration_preserves_existing_orders_and_starts_with_empty_salary_month
     let wid = worker(&mut e);
     drop(e);
     let conn = rusqlite::Connection::open(&path).unwrap();
-    conn.execute_batch("DROP TABLE service_voids; DROP TABLE separate_cost_voids; DELETE FROM schema_migrations WHERE version=7; DROP TABLE separate_costs; DELETE FROM schema_migrations WHERE version=6; DROP TABLE monthly_salaries; DROP TABLE salary_months; DELETE FROM schema_migrations WHERE version=5; PRAGMA user_version=4;").unwrap();
+    conn.execute_batch("DROP TABLE mobile_links; DROP TABLE mobile_imports; DELETE FROM schema_migrations WHERE version=8; DROP TABLE service_voids; DROP TABLE separate_cost_voids; DELETE FROM schema_migrations WHERE version=7; DROP TABLE separate_costs; DELETE FROM schema_migrations WHERE version=6; DROP TABLE monthly_salaries; DROP TABLE salary_months; DELETE FROM schema_migrations WHERE version=5; PRAGMA user_version=4;").unwrap();
     drop(conn);
     let e = Engine::open(&path).unwrap();
     let d = salaries(&e, "2026-05");

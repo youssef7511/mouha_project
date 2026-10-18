@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-phone-import"
+description = "Enables the phone_import command without any pre-configured scope."
+commands.allow = ["phone_import"]
+
+[[permission]]
+identifier = "deny-phone-import"
+description = "Denies the phone_import command without any pre-configured scope."
+commands.deny = ["phone_import"]

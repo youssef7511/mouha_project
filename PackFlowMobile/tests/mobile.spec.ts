@@ -161,6 +161,28 @@ test('mobile backup restores records, provides safety undo and rejects damaged f
   await page.getByLabel('Search clients').fill('Added after backup');
   await expect(page.locator('.client-card')).toContainText('Added after backup');
 });
+test('export date-range transfer workbook from phone settings', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('navigation').getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByLabel('Changed from', { exact: true }).fill('2026-01-01');
+  await page.getByLabel('Changed through', { exact: true }).fill('2027-01-01');
+  const [download, response] = await Promise.all([
+    page.waitForEvent('download'),
+    page.waitForResponse((r) => r.url().endsWith('/api/transfer')),
+    page.getByRole('button', { name: 'Export transfer Excel', exact: true }).click(),
+  ]);
+  expect(response.ok()).toBeTruthy();
+  expect(response.request().postDataJSON()).toEqual({
+    from_date: '2026-01-01',
+    to_date: '2027-01-01',
+  });
+  expect(download.suggestedFilename()).toMatch(/PackFlow-transfer.*\.xlsx$/);
+  const bytes = await readFile((await download.path())!);
+  expect(bytes.subarray(0, 2).toString()).toBe('PK');
+  expect(bytes.length).toBeGreaterThan(1000);
+  await expect(page.getByRole('status')).toContainText('Transfer Excel downloaded');
+});
+
 test('cancel offers discard and stage template CRUD/reordering does not rename saved orders', async ({
   page,
 }) => {

@@ -7,6 +7,7 @@ fn main() {
             "workspace_backup",
             "workspace_restore",
             "workspace_export",
+            "phone_import",
         ]),
     ))
     .expect("Tauri build configuration failed");

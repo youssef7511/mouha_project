@@ -135,8 +135,9 @@ impl Engine {
         let payments = rows(&self.conn,"SELECT id,kind,reason,EXISTS(SELECT 1 FROM refund_allocations a WHERE a.receipt_event_id=payment_events.id) AS reversed,CAST(amount_fils AS TEXT) AS amount_fils,business_date,method,reference,notes FROM payment_events WHERE order_id=?1 ORDER BY business_date DESC,created_at DESC",[order_id])?;
         let stage_prices = rows(&self.conn,"SELECT p.stage_id,s.template_id,s.name_snapshot,p.pricing_mode,CAST(p.fixed_total_fils AS TEXT) AS fixed_total_fils,CAST(p.quantity_scaled AS TEXT) AS quantity_scaled,CAST(p.unit_price_fils AS TEXT) AS unit_price_fils,CAST(p.derived_total_fils AS TEXT) AS total_fils FROM quote_stage_prices p JOIN order_stages s ON s.id=p.stage_id WHERE p.order_id=?1 AND p.quote_revision_id=?2 ORDER BY s.position",params![order_id,order["current_quote_revision_id"].as_str()])?;
         let stage_item_prices = rows(&self.conn,"SELECT p.stage_id,p.item_id,CAST(p.unit_price_fils AS TEXT) AS unit_price_fils FROM quote_stage_item_prices p JOIN order_items i ON i.id=p.item_id WHERE p.order_id=?1 AND p.quote_revision_id=?2 ORDER BY i.position",params![order_id,order["current_quote_revision_id"].as_str()])?;
+        let mobile_source = rows(&self.conn,"SELECT workspace_id,source_id,source_version,json_extract(source_json,'$.number') AS number FROM mobile_links WHERE entity='order' AND target_id=?1",[order_id])?.into_iter().next();
         Ok(
-            json!({"order":order,"items":items,"stages":stages,"costs":costs,"work":work,"cost_fils":cost.to_string(),"history":history,"services":services,"payments":payments,"stage_prices":stage_prices,"stage_item_prices":stage_item_prices}),
+            json!({"order":order,"items":items,"stages":stages,"costs":costs,"work":work,"cost_fils":cost.to_string(),"history":history,"services":services,"payments":payments,"stage_prices":stage_prices,"stage_item_prices":stage_item_prices,"mobile_source":mobile_source}),
         )
     }
     pub fn mutate(&mut self, request: Mutation) -> Result<Value> {

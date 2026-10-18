@@ -11,6 +11,8 @@ services:
       - "127.0.0.1:4318:4318"
     volumes:
       - .:/workspace
+      - ../PackFlowTransfer:/PackFlowTransfer
+      - ../PackFlowMobile:/PackFlowMobile
       - ./.dev-data:/data
       - packflow-cargo:/usr/local/cargo/registry
       - packflow-build:/build
@@ -22,6 +24,8 @@ services:
       CARGO_TARGET_DIR: /build
     volumes:
       - .:/workspace
+      - ../PackFlowTransfer:/PackFlowTransfer
+      - ../PackFlowMobile:/PackFlowMobile
       - packflow-cargo:/usr/local/cargo/registry
       - packflow-build:/build
     profiles: [test]
@@ -39,6 +43,8 @@ services:
     tmpfs: [/test-data]
     volumes:
       - .:/workspace
+      - ../PackFlowTransfer:/PackFlowTransfer
+      - ../PackFlowMobile:/PackFlowMobile
       - packflow-cargo:/usr/local/cargo/registry
       - packflow-build:/build
     profiles: [test]
@@ -52,6 +58,8 @@ services:
       CARGO_TARGET_DIR: /build-native
     volumes:
       - .:/workspace
+      - ../PackFlowTransfer:/PackFlowTransfer
+      - ../PackFlowMobile:/PackFlowMobile
       - packflow-cargo:/usr/local/cargo/registry
       - packflow-native-build:/build-native
     profiles: [test]

@@ -10,6 +10,7 @@ use std::{
 };
 
 enum Task {
+    Phone(crate::transfer::ImportRequest, SyncSender<Result<Value>>),
     Excel(
         crate::excel::ExportRequest,
         SyncSender<Result<crate::excel::ExcelFile>>,
@@ -24,6 +25,14 @@ pub struct DbWorker {
     sender: SyncSender<Task>,
 }
 impl DbWorker {
+    pub fn import_phone(&self, request: crate::transfer::ImportRequest) -> Result<Value> {
+        let (reply, wait) = mpsc::sync_channel(1);
+        self.sender
+            .send(Task::Phone(request, reply))
+            .map_err(|_| DomainError::storage("Database worker stopped."))?;
+        wait.recv()
+            .map_err(|_| DomainError::storage("Database worker stopped."))?
+    }
     pub fn start(path: PathBuf) -> Result<Self> {
         let (sender, receiver) = mpsc::sync_channel::<Task>(64);
         let (ready, wait) = mpsc::sync_channel(1);
@@ -42,6 +51,9 @@ impl DbWorker {
                 };
                 for task in receiver {
                     match task {
+                        Task::Phone(request, reply) => {
+                            let _ = reply.send(engine.import_phone(request));
+                        }
                         Task::Excel(request, reply) => {
                             let _ = reply.send(crate::excel::create(&engine.conn, &request));
                         }

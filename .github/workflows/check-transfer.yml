@@ -1,0 +1,47 @@
+name: Phone to Mac transfer checks
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['PackFlow/**', 'PackFlowMobile/crates/mobile-core/**', 'PackFlowTransfer/**', '.github/workflows/check-transfer.yml']
+  pull_request:
+    paths: ['PackFlow/**', 'PackFlowMobile/crates/mobile-core/**', 'PackFlowTransfer/**', '.github/workflows/check-transfer.yml']
+permissions:
+  contents: read
+concurrency:
+  group: transfer-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: PackFlow
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: PackFlow/package-lock.json
+      - run: echo "PACKFLOW_TRANSFER_TEST_OUTPUT=$RUNNER_TEMP/phone-transfer.xlsx" >> "$GITHUB_ENV"
+      - run: npm ci && node scripts/check-release-data.mjs && npm run build && npm test && npm run format:check
+      - run: cargo fmt --all --check && cargo test --locked -p packflow-core --features preview-server && cargo clippy --locked -p packflow-core --all-targets --features preview-server -- -D warnings
+      - run: npx playwright install --with-deps chromium
+      - run: |
+          cargo build --locked -p packflow-core --features preview-server --bin packflow-preview
+          sudo mkdir -p /test-data
+          sudo chown "$(id -u):$(id -g)" /test-data
+          PACKFLOW_DATA_DIR=/test-data PACKFLOW_TEST_NO_AUTH=1 PACKFLOW_PREVIEW_BIND=127.0.0.1:4319 target/debug/packflow-preview > "$RUNNER_TEMP/transfer-core.log" 2>&1 &
+          for attempt in {1..30}; do
+            if curl -fsS -X POST -H 'Content-Type: application/json' --data '{"kind":"bootstrap"}' http://127.0.0.1:4319/api/query; then break; fi
+            sleep 1
+          done
+          npm run test:browser
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        if: always()
+        with:
+          name: PackFlow-phone-transfer-browser-checks
+          path: PackFlow/test-results
+          retention-days: 7

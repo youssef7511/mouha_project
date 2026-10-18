@@ -1,5 +1,11 @@
 # PackFlow iPhone companion — proposal
 
+## Manual Excel transfer implemented — 19 October 2026
+
+The user approved one-way phone → Mac Excel transfer with date-range selection. Phone version 0.2 exports a strict versioned workbook; Mac version 0.4 provides Import from phone on Clients, Orders, Payments and Settings. Clients are explicitly matched, new orders receive Mac PF numbers, quotes are recalculated, duplicate source records are skipped and conflicts preserve Mac work. Related older records are included automatically. Preview uses a disposable database; apply requires a current preview and saves a safety backup before an atomic replacement. No cloud or automatic/reverse sync is introduced. See [the transfer contract and usage guide](../../PackFlowTransfer/README.md) for the workbook sheets, limits and conflict rules.
+
+The historical standalone scope below predates this manual transfer addition. Mobile backups remain separate from Excel transfer, and signed physical-iPhone acceptance remains required.
+
 ## Confirmed direction — 18 October 2026
 
 The user selected **standalone offline first, transfer later**, then confirmed **full box details and stage pricing** for phone order entry. Version 1 will keep its own on-device records, with Clients, Orders and Customer receipts/balances. Phone orders must support multiple box types, descriptions/dimensions, quantities, selectable stages and stage-by-stage customer pricing. Implementation is now in the separate `../PackFlowMobile` directory, with audited order revisions, receipt reversals and mobile backup/restore. No automatic connection to the Mac, server, cloud hosting, synchronization or transfer bridge is part of this first version. The phone app implementation is present; signed physical-iPhone acceptance remains required. See [the mobile README](../../PackFlowMobile/README.md).

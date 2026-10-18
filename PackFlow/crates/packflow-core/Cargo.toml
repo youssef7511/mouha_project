@@ -1,6 +1,6 @@
 [package]
 name = "packflow-core"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2021"
 
 [features]
@@ -16,9 +16,12 @@ sha2 = "0.10"
 tempfile = "3"
 argon2 = "0.5"
 rust_xlsxwriter = "=0.100.0"
+packflow-transfer = { path = "../../../PackFlowTransfer" }
+base64 = "0.22"
 tiny_http = { version = "0.12", optional = true }
 
 [dev-dependencies]
+packflow-mobile-core = { path = "../../../PackFlowMobile/crates/mobile-core" }
 zip = { version = "=9.0.5", default-features = false, features = ["deflate"] }
 
 [[bin]]

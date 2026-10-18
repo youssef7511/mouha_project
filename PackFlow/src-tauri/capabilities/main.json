@@ -10,6 +10,7 @@
     "allow-auth",
     "allow-workspace-backup",
     "allow-workspace-restore",
-    "allow-workspace-export"
+    "allow-workspace-export",
+    "allow-phone-import"
   ]
 }

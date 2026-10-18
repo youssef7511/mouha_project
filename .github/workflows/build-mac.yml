@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['PackFlow/**', '.github/workflows/build-mac.yml', '.gitattributes', '.gitignore']
+    paths: ['PackFlowTransfer/**', 'PackFlowMobile/crates/mobile-core/**', 'PackFlow/**', '.github/workflows/build-mac.yml', '.gitattributes', '.gitignore']
   pull_request:
-    paths: ['PackFlow/**', '.github/workflows/build-mac.yml', '.gitattributes', '.gitignore']
+    paths: ['PackFlowTransfer/**', 'PackFlowMobile/crates/mobile-core/**', 'PackFlow/**', '.github/workflows/build-mac.yml', '.gitattributes', '.gitignore']
 
 permissions:
   contents: read

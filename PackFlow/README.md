@@ -150,3 +150,9 @@ For the optional seed script after preview account creation, supply `PACKFLOW_PR
 
 
 Excel export (0.3.1): use **Export Excel** on any data page. See [Excel export details](docs/EXCEL_EXPORT.md) for worksheets, pagination, financial precision and date/month scope. Existing Mac test installations keep their account and records when updating.
+
+## Phone Excel transfer (0.4)
+
+Import from phone is available on Clients, Orders, Payments and Settings. Match phone contacts, preview new/duplicate/conflicting records, then import ready records. A safety backup is saved first. Use the phone's Settings → Transfer to Mac export, not a reporting workbook. See [the complete transfer guide](../PackFlowTransfer/README.md).
+
+Source builds require the sibling `PackFlowTransfer` and `PackFlowMobile` directories from this repository; keep the repository layout intact. Installed Mac/iPhone applications do not depend on source folders or each other.

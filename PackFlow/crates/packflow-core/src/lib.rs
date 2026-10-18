@@ -13,6 +13,7 @@ pub mod recovery;
 mod salaries;
 pub mod service;
 mod stage_quotes;
+pub mod transfer;
 mod worker;
 pub use error::DomainError;
 pub use models::{Mutation, Query};

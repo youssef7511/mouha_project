@@ -8,7 +8,7 @@ use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::{path::Path, time::Duration};
 
-pub const SCHEMA_VERSION: i64 = 7;
+pub const SCHEMA_VERSION: i64 = 8;
 const SCHEMA: &str = include_str!("../migrations/001_foundation.sql");
 const FINANCE_SCHEMA: &str = include_str!("../migrations/002_order_finance.sql");
 const DEADLINE_SCHEMA: &str = include_str!("../migrations/003_payment_deadlines.sql");
@@ -16,6 +16,7 @@ const STAGE_QUOTE_SCHEMA: &str = include_str!("../migrations/004_stage_quotes.sq
 const SALARY_SCHEMA: &str = include_str!("../migrations/005_monthly_salaries.sql");
 const SEPARATE_COST_SCHEMA: &str = include_str!("../migrations/006_separate_costs.sql");
 const CORRECTION_SCHEMA: &str = include_str!("../migrations/007_corrections.sql");
+const TRANSFER_SCHEMA: &str = include_str!("../migrations/008_phone_transfer.sql");
 pub fn hash(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
@@ -96,6 +97,7 @@ pub fn open(path: &Path) -> Result<Connection> {
             (5, SALARY_SCHEMA),
             (6, SEPARATE_COST_SCHEMA),
             (7, CORRECTION_SCHEMA),
+            (8, TRANSFER_SCHEMA),
         ] {
             if number > version {
                 break;
@@ -183,6 +185,16 @@ pub fn open(path: &Path) -> Result<Connection> {
             params![hash(CORRECTION_SCHEMA.as_bytes()), now()],
         )?;
         tx.execute_batch("PRAGMA user_version=7;")?;
+        tx.commit()?;
+    }
+    if version < 8 {
+        let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        tx.execute_batch(TRANSFER_SCHEMA)?;
+        tx.execute(
+            "INSERT INTO schema_migrations VALUES(8,?1,?2,'0.4.0')",
+            params![hash(TRANSFER_SCHEMA.as_bytes()), now()],
+        )?;
+        tx.execute_batch("PRAGMA user_version=8;")?;
         tx.commit()?;
     }
     let fk_error = conn

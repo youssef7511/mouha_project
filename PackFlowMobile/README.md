@@ -10,6 +10,7 @@ Standalone offline iPhone application, kept separately from `../PackFlow`. React
 - Exact KWD calculations: integer fils, three decimal places, checked totals and half-up line rounding. Unknown prices stay unknown rather than becoming zero.
 - Order-linked deposits and receipts, balances/credits, search, and audited full receipt reversals. A deposit and its new order commit together.
 - Order revisions require a reason and preserve prior quotes. Optimistic versions reject stale updates. Archives retain orders, debts and payment history.
+- Date-range Excel transfer to the Mac, with related clients, box details, stage pricing, receipts and corrections included. See [the transfer guide](../PackFlowTransfer/README.md).
 - Mobile-only `.pfmobile` backups, validated restore, and a safety backup before replacement. On iPhone, saved backups are accessible through Files → On My iPhone → PackFlow Mobile → PackFlow Mobile Backups. Copy backups outside the phone regularly.
 
 First launch creates an empty workspace plus the four default stage definitions. Test fixtures are temporary and are not included in the application.
@@ -63,8 +64,8 @@ For a real phone, connect the phone to the Mac, select an Apple development team
 
 ## Boundaries
 
-This version has its own records and uses `MOB-<device>-<sequence>` numbers. It does not connect, transfer or sync with the Mac. Its balance covers this phone workspace only. Desktop `.pfbackup` files and Excel files are not mobile restore files. Future transfer needs explicit ID mapping and duplicate-safe payment import; UUIDs, workspace/device IDs and operation IDs are retained for that work.
+This version has its own records and uses `MOB-<device>-<sequence>` numbers. It supports manual phone-to-Mac Excel transfer through Settings → Transfer to Mac. It has no automatic connection, reverse transfer or online sync. Its balance covers this phone workspace only. Desktop `.pfbackup` files and Excel files are not mobile restore files. The Mac import preview explicitly maps clients, retains source UUIDs and deduplicates imported payments; conflicts are left unchanged for review.
 
 Protection currently relies on the iPhone's screen lock; an app PIN, Face ID, cloud accounts and remote recovery are not implemented. Backups contain business data and are not encrypted. Keep them in a protected location. Losing the phone without an external backup loses its independent records.
 
-Production expenses, stock, payroll, desktop reports, Excel import/export, fulfillment tracking and Mac login are outside this first phone version. Physical-device testing (including the keyboard, Files backup/restore, airplane-mode restart and signed install/update) is required before daily use. See [architecture](docs/ARCHITECTURE.md) and the [acceptance checklist](docs/ACCEPTANCE.md).
+Production expenses, stock, payroll, desktop reports, phone Excel import, fulfillment tracking and Mac login are outside this first phone version. Physical-device testing (including the keyboard, Files backup/restore, airplane-mode restart and signed install/update) is required before daily use. See [architecture](docs/ARCHITECTURE.md) and the [acceptance checklist](docs/ACCEPTANCE.md).

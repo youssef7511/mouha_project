@@ -52,6 +52,14 @@ async fn mobile_mutate(state: tauri::State<'_, Core>, request: Mutation) -> Resu
     operation(&state, move |e| e.mutate(request)).await
 }
 #[tauri::command]
+async fn mobile_transfer(
+    state: tauri::State<'_, Core>,
+    from_date: String,
+    to_date: String,
+) -> Result<Value> {
+    operation(&state, move |e| e.save_transfer(&from_date, &to_date)).await
+}
+#[tauri::command]
 async fn mobile_backup(state: tauri::State<'_, Core>) -> Result<Value> {
     operation(&state, |e| e.save_backup()).await
 }
@@ -76,6 +84,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             mobile_query,
             mobile_mutate,
+            mobile_transfer,
             mobile_backup,
             mobile_restore
         ])

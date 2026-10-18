@@ -168,6 +168,19 @@ async fn auth(state: tauri::State<'_, Shared>, request: AuthRequest) -> Result<V
     .await
 }
 #[tauri::command]
+async fn phone_import(
+    state: tauri::State<'_, Shared>,
+    request: packflow_core::transfer::ImportRequest,
+) -> Result<Value> {
+    let state = state.inner().clone();
+    blocking(move || {
+        let session = lock(&state)?;
+        session.auth.require()?;
+        state.worker.import_phone(request)
+    })
+    .await
+}
+#[tauri::command]
 async fn workspace_backup(state: tauri::State<'_, Shared>) -> Result<Value> {
     {
         lock(&state)?.auth.require()?;
@@ -299,7 +312,8 @@ pub fn run() {
             auth,
             workspace_backup,
             workspace_restore,
-            workspace_export
+            workspace_export,
+            phone_import
         ])
         .run(tauri::generate_context!())
         .expect("PackFlow could not start. Business data was not replaced.");

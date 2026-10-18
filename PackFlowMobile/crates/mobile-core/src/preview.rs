@@ -56,6 +56,14 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     }));
                     return Ok(bytes);
                 }
+                "/api/transfer" => {
+                    let v: serde_json::Value = serde_json::from_str(&body)?;
+                    let from = v["from_date"].as_str().unwrap_or("");
+                    let to = v["to_date"].as_str().unwrap_or("");
+                    let bytes = core.transfer_bytes(from, to)?;
+                    download = Some(format!("PackFlow-transfer-{from}-{to}.xlsx"));
+                    return Ok(bytes);
+                }
                 "/api/restore" => {
                     let v: serde_json::Value = serde_json::from_str(&body)?;
                     let bytes = base64::engine::general_purpose::STANDARD

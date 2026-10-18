@@ -2,9 +2,9 @@ name: PackFlow Mobile checks and iOS simulator
 on:
   push:
     branches: [main]
-    paths: ['PackFlowMobile/**', '.github/workflows/build-mobile.yml']
+    paths: ['PackFlowTransfer/**', 'PackFlowMobile/**', '.github/workflows/build-mobile.yml']
   pull_request:
-    paths: ['PackFlowMobile/**', '.github/workflows/build-mobile.yml']
+    paths: ['PackFlowTransfer/**', 'PackFlowMobile/**', '.github/workflows/build-mobile.yml']
   workflow_dispatch:
 permissions:
   contents: read

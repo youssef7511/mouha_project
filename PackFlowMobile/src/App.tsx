@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { TransferExport } from './TransferExport';
 import { isTauri } from '@tauri-apps/api/core';
 import {
   Box,
@@ -922,6 +923,7 @@ function WorkspaceSettings({
           </div>
         ))}
       </section>
+      <TransferExport today={store.data.today} disabled={busy || store.busy} />
       <section className="settings-card">
         <h2>Mobile backup & restore</h2>
         <p>

@@ -213,6 +213,12 @@ export interface History {
   actor_name: string;
 }
 export interface OrderDetail {
+  mobile_source?: {
+    number: string;
+    source_version: number;
+    source_id: string;
+    workspace_id: string;
+  } | null;
   stage_prices: StagePrice[];
   stage_item_prices: { stage_id: string; item_id: string; unit_price_fils: string }[];
   order: Omit<OrderSummary, 'ordered_boxes' | 'stage_count' | 'completed_stages'>;

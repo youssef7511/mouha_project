@@ -726,3 +726,4 @@ fn apply(tx: &Transaction, device: &str, a: Action) -> Result<Value> {
         }
     }
 }
+mod transfer;

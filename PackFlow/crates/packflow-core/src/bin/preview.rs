@@ -46,12 +46,17 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     return Err(DomainError::new("FORBIDDEN", "Untrusted preview origin."));
                 }
             }
-            if req.body_length().unwrap_or(usize::MAX) > 1_048_576 {
+            let limit = if req.url() == "/api/phone-import" {
+                12 * 1024 * 1024
+            } else {
+                1_048_576
+            };
+            if req.body_length().unwrap_or(usize::MAX) > limit {
                 return Err(DomainError::validation("body", "Request too large."));
             }
             let mut body = String::new();
-            std::io::Read::take(req.as_reader(), 1_048_577).read_to_string(&mut body)?;
-            if body.len() > 1_048_576 {
+            std::io::Read::take(req.as_reader(), (limit + 1) as u64).read_to_string(&mut body)?;
+            if body.len() > limit {
                 return Err(DomainError::validation("body", "Request too large."));
             }
             if req.url() == "/api/auth" {
@@ -74,6 +79,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     .map(Output::Excel);
             }
             match req.url() {
+                "/api/phone-import" => worker.import_phone(serde_json::from_str(&body)?),
                 "/api/query" => worker.query(serde_json::from_str::<Query>(&body)?),
                 "/api/mutate" => {
                     let mut request = serde_json::from_str::<Mutation>(&body)?;
