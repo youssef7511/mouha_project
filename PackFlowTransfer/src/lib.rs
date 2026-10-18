@@ -244,7 +244,9 @@ impl Package {
         for i in 0..zip.len() {
             let f = zip.by_index(i).map_err(|e| e.to_string())?;
             let name = f.name().map_err(|e| e.to_string())?;
-            let worksheet = name.starts_with("xl/worksheets/") && name.ends_with(".xml");
+            // Relationships can point to XML under any name or extension.
+            // Check every part before Calamine follows those relationships.
+            let worksheet = !name.ends_with('/');
             let mut expanded = Vec::new();
             f.take(MAX_EXPANDED + 1)
                 .read_to_end(&mut expanded)
@@ -254,6 +256,9 @@ impl Package {
                 return Err("Expanded workbook exceeds 32 MB.".into());
             }
             if worksheet {
+                if std::str::from_utf8(&expanded).is_err() || expanded.contains(&0) {
+                    return Err("Transfer workbooks must contain UTF-8 XML parts.".into());
+                }
                 let mut reader = quick_xml::Reader::from_reader(expanded.as_slice());
                 loop {
                     match reader.read_event().map_err(|_| "Invalid worksheet XML")? {

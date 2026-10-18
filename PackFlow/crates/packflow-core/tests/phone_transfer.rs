@@ -337,6 +337,46 @@ fn export_period_selects_creation_and_historical_edits_even_after_later_updates(
     assert!(empty.orders.is_empty());
     assert!(empty.clients.is_empty());
 }
+
+#[test]
+fn workbook_reference_bounds_are_checked_for_renamed_parts() {
+    use std::io::{Cursor, Read, Write};
+    let (_dir, p, _m, c, _) = fixture();
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(request(&p, &c).data)
+        .unwrap();
+    let mut archive = zip::ZipArchive::new(Cursor::new(bytes)).unwrap();
+    let mut out = zip::ZipWriter::new(Cursor::new(Vec::new()));
+    for i in 0..archive.len() {
+        let mut f = archive.by_index(i).unwrap();
+        let mut name = f.name().unwrap().into_owned();
+        let mut bytes = vec![];
+        f.read_to_end(&mut bytes).unwrap();
+        if name == "xl/worksheets/sheet1.xml" {
+            name = "xl/worksheets/sheet1.XML".into();
+            bytes = String::from_utf8(bytes)
+                .unwrap()
+                .replacen("r=\"A1\"", "r=\"AG1\"", 1)
+                .into_bytes();
+        } else if name == "xl/_rels/workbook.xml.rels" {
+            bytes = String::from_utf8(bytes)
+                .unwrap()
+                .replace("worksheets/sheet1.xml", "worksheets/sheet1.XML")
+                .into_bytes();
+        }
+        out.start_file(
+            name,
+            zip::write::SimpleFileOptions::default()
+                .compression_method(zip::CompressionMethod::Deflated),
+        )
+        .unwrap();
+        out.write_all(&bytes).unwrap();
+    }
+    let bad = out.finish().unwrap().into_inner();
+    assert!(packflow_transfer::Package::decode(&bad)
+        .unwrap_err()
+        .contains("worksheet bounds"));
+}
 #[test]
 fn dated_export_carries_older_client_order_and_original_receipt_and_restore_undoes_import() {
     let (dir, mut p, mut m, c, source) = fixture();
