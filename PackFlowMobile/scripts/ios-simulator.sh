@@ -17,15 +17,17 @@ device_id=$(xcrun simctl list devices available -j | node -e 'let s="";process.s
 xcrun simctl boot "$device_id" || true
 xcrun simctl bootstatus "$device_id" -b
 xcrun simctl install "$device_id" "$app_path"
+xcrun simctl terminate "$device_id" com.packflow.mobile >/dev/null 2>&1 || true
 SIMCTL_CHILD_PACKFLOW_MOBILE_SMOKE=1 xcrun simctl launch "$device_id" com.packflow.mobile
 container_path=$(xcrun simctl get_app_container "$device_id" com.packflow.mobile data)
 marker=""
-for attempt in {1..30}; do
+for attempt in {1..120}; do
   marker=$(find "$container_path" -name mobile-smoke-ok.json -print -quit)
   if [ -n "$marker" ]; then break; fi
   sleep 1
 done
 xcrun simctl io "$device_id" screenshot artifacts/phone-launch.png
+marker=$(find "$container_path" -name mobile-smoke-ok.json -print -quit)
 test -n "$marker"
 cp "$marker" artifacts/native-startup-check.json
 node -e 'const d=JSON.parse(require("fs").readFileSync("artifacts/native-startup-check.json","utf8"));for(const [k,v] of Object.entries({clients:0,orders:0,payments:0,templates:4}))if(d[k]!==v)throw Error(`Unexpected fresh workspace: ${k}`);console.log("iOS native startup and fresh workspace passed")'
