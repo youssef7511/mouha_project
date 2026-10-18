@@ -66,6 +66,7 @@ test('phone workflow: client, mixed boxes/stage pricing, deposit, revisions and 
   await boxes.nth(0).getByLabel('Ordered boxes', { exact: true }).fill('200');
   await page.getByLabel('Reason for revision').fill('Customer added more small boxes');
   await page.getByRole('button', { name: 'Save revision', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('.quote-summary')).toContainText('KWD 82.917');
   await expect(page.locator('.metrics')).toContainText('KWD 72.917');
   await mkdir('test-results', { recursive: true });
