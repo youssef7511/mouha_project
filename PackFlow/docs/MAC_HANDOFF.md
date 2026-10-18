@@ -1,5 +1,11 @@
 # PackFlow — Mac test-build handoff
 
+## Excel export release 0.3.1 — 18 October 2026
+
+All nine data pages now expose **Export Excel**. See [EXCEL_EXPORT.md](EXCEL_EXPORT.md) for worksheets, filters, precision and correction treatment. Install the new 0.3.1 test DMG over the existing **PackFlow Test** application; the identifier/data directory/account are unchanged. Verify Excel export from each page on the Mac, cancel a save, save to a normal folder, reject an unwritable location, and open a file in Excel or Numbers to inspect KWD amounts and Arabic descriptions. Existing business data remains local; installers continue to start empty on a fresh device.
+
+The previous download from WhatsApp was blocked by macOS quarantine despite a valid ad-hoc signature; removing the quarantine attribute from the exact test application allowed launch on the friend's Mac. Ad-hoc signatures do not provide production notarization. Prefer downloading the new artifact directly from the GitHub run and use the normal Privacy & Security approval when available. Do not delete workspace data to troubleshoot installation.
+
 ## Startup permission fix — 15 October 2026
 
 The first installer built successfully but failed the real-Mac startup check at “Opening local account”. The native `auth`, `workspace_backup` and `workspace_restore` handlers were missing from the application command manifest and the main window capability. The replacement build declares and grants all five native handlers. A frontend test now checks that every handler is declared and granted; it runs during each installer build. Text IPC errors are also preserved on screen instead of being replaced by a generic message. Build success does not establish a successful real-Mac launch.

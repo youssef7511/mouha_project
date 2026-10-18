@@ -9,6 +9,7 @@
     "allow-mutate",
     "allow-auth",
     "allow-workspace-backup",
-    "allow-workspace-restore"
+    "allow-workspace-restore",
+    "allow-workspace-export"
   ]
 }

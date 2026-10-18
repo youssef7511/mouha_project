@@ -225,6 +225,44 @@ async fn workspace_restore(state: tauri::State<'_, Shared>, confirmation: String
     .await
 }
 
+#[tauri::command]
+async fn workspace_export(
+    state: tauri::State<'_, Shared>,
+    request: packflow_core::excel::ExportRequest,
+) -> Result<Value> {
+    {
+        lock(&state)?.auth.require()?;
+    }
+    let file = rfd::AsyncFileDialog::new()
+        .add_filter("Excel workbook", &["xlsx"])
+        .set_file_name(format!("PackFlow-{}.xlsx", chrono_filename()))
+        .save_file()
+        .await;
+    let Some(file) = file else {
+        return Ok(json!({"cancelled":true}));
+    };
+    let path = file.path().to_owned();
+    let state = state.inner().clone();
+    blocking(move || {
+        let session = lock(&state)?;
+        session.auth.require()?;
+        let excel = state.worker.export_excel(request)?;
+        excel.save(&path)?;
+        Ok(json!({"path":path.to_string_lossy(),"cancelled":false}))
+    })
+    .await
+}
+fn chrono_filename() -> String {
+    format!(
+        "{}-{}",
+        packflow_core::service::business_today(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs()
+    )
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
@@ -260,7 +298,8 @@ pub fn run() {
             mutate,
             auth,
             workspace_backup,
-            workspace_restore
+            workspace_restore,
+            workspace_export
         ])
         .run(tauri::generate_context!())
         .expect("PackFlow could not start. Business data was not replaced.");

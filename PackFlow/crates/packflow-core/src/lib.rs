@@ -2,6 +2,7 @@ pub mod auth;
 mod corrections;
 pub mod db;
 pub mod error;
+pub mod excel;
 mod finance;
 pub mod models;
 pub mod money;

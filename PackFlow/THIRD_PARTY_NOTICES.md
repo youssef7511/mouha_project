@@ -9,8 +9,9 @@ PackFlow's foundation uses the packages below. Their license files remain author
 | TypeScript, Playwright | Apache-2.0 · respective package LICENSE files |
 | Lucide | ISC · https://github.com/lucide-icons/lucide |
 | rusqlite | MIT · https://github.com/rusqlite/rusqlite |
+| rust_xlsxwriter 0.100.0 | MIT OR Apache-2.0 · https://github.com/jmcnamara/rust_xlsxwriter |
 | SQLite | Public domain · https://www.sqlite.org/copyright.html |
 | DM Sans and Manrope font data | SIL Open Font License 1.1 · fontsource package font license files |
 | Fontsource package code | MIT · https://github.com/fontsource/fontsource |
 
-Bundled font resources are imported locally by the Vite build. No font source server is contacted at runtime. PackFlow's SVG app icon is a code-created project asset. PDF/XLSX libraries are not installed yet; their selection and license checks accompany that later milestone.
+Bundled font resources are imported locally by the Vite build. No font source server is contacted at runtime. PackFlow's SVG app icon is a code-created project asset. Excel generation uses rust_xlsxwriter locally; it does not require Excel or a cloud service. PDF generation remains deferred.

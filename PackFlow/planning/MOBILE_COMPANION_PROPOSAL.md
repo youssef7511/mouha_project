@@ -1,5 +1,15 @@
 # PackFlow iPhone companion — proposal
 
+## Confirmed direction — 18 October 2026
+
+The user selected **standalone offline first, transfer later**. Version 1 will keep its own on-device records. Start with rapid client, draft order and customer-receipt capture; confirm the exact fields and editing rules before implementation. No automatic connection to the Mac, server, cloud hosting, synchronization or transfer bridge is part of this first version. This document is a proposal; mobile implementation has not started.
+
+Plan stable UUIDs and a device identity now so a future transfer can identify the same record without duplication. Phone draft identifiers must remain distinct from official Mac PF numbers until an import/numbering policy is implemented. A standalone phone balance covers that phone's records only and must not be presented as the complete Mac balance. The new desktop Excel export is for analysis, not a duplicate-safe phone transfer/import format.
+
+If online synchronization is added later, both devices retain local databases and send uniquely identified operations to a private authenticated HTTPS server. The phone can save offline, upload when online while the Mac is off, and the Mac downloads accepted changes on reconnect. The shared service deduplicates payments, validates workspace ownership and versions, assigns official numbering and sends acknowledgements. Editing conflicts need review; payments need audited corrections. Hosting, server backups, secure accounts, migrations and ongoing operation become additional responsibilities. Sync does not replace backups or justify sharing a live SQLite file.
+
+Before phone coding, agree on: client fields and search; draft order fields (multiple box items, quantities, descriptions/dimensions, quote/deposit); whether receipts attach to an order or may be client credit; correction/edit rules; phone login/lock and backup; and distribution/testing on his iPhone. Transfer design can follow separately, but retain provenance/UUIDs from the start.
+
 15 October 2026. Updated direction: defer phone implementation and all synchronization work while completing the Mac application. The user is considering a small standalone offline phone app for rapid entry first, with a connected version later. A standalone phone app would keep its own data; transfer or local pairing with the Mac would require an explicit additional workflow. No cloud service, local pairing, import bridge or phone app is currently implemented.
 
 The connected architecture below is retained as a future option, not the current implementation scope. The earlier offline/online-anywhere requirement applies if that connected option is resumed.

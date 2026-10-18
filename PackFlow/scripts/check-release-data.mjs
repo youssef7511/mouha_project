@@ -1,6 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import { readdir, readFile, lstat, realpath } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const forbidden = (name) => {
   const parts = name.replaceAll('\\', '/').split('/');
@@ -18,7 +21,9 @@ const forbidden = (name) => {
   );
 };
 
-const repo = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
+const repo = execFileSync('git', ['-C', project, 'rev-parse', '--show-toplevel'], {
+  encoding: 'utf8',
+}).trim();
 const tracked = execFileSync('git', ['-C', repo, 'ls-files', '-z'], { encoding: 'utf8' })
   .split('\0')
   .filter(Boolean);
@@ -26,13 +31,14 @@ const rejected = tracked.filter(forbidden);
 if (rejected.length) throw new Error(`Private data must not be tracked:\n${rejected.join('\n')}`);
 
 for (const file of ['src-tauri/tauri.conf.json', 'src-tauri/tauri.test.conf.json']) {
-  const config = JSON.parse(await readFile(file, 'utf8'));
+  const config = JSON.parse(await readFile(path.join(project, file), 'utf8'));
   if (config.bundle?.resources && Object.keys(config.bundle.resources).length)
     throw new Error('Additional bundle resources require explicit review before release.');
 }
 const bundleIndex = process.argv.indexOf('--bundle');
 if (bundleIndex !== -1) {
-  const root = process.argv[bundleIndex + 1];
+  const input = process.argv[bundleIndex + 1];
+  const root = input ? path.resolve(project, input) : null;
   if (!root || !(await lstat(root)).isDirectory())
     throw new Error('Application bundle is missing.');
   async function scan(directory) {

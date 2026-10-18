@@ -10,6 +10,10 @@ use std::{
 };
 
 enum Task {
+    Excel(
+        crate::excel::ExportRequest,
+        SyncSender<Result<crate::excel::ExcelFile>>,
+    ),
     Query(Query, SyncSender<Result<Value>>),
     Mutate(Box<Mutation>, SyncSender<Result<Value>>),
     Backup(PathBuf, SyncSender<Result<Value>>),
@@ -38,6 +42,9 @@ impl DbWorker {
                 };
                 for task in receiver {
                     match task {
+                        Task::Excel(request, reply) => {
+                            let _ = reply.send(crate::excel::create(&engine.conn, &request));
+                        }
                         Task::Backup(path, reply) => {
                             let _ = reply.send(engine.backup(&path));
                         }
@@ -61,6 +68,17 @@ impl DbWorker {
         let (reply, wait) = mpsc::sync_channel(1);
         self.sender
             .send(Task::Query(query, reply))
+            .map_err(|_| DomainError::storage("Database worker stopped."))?;
+        wait.recv()
+            .map_err(|_| DomainError::storage("Database worker stopped."))?
+    }
+    pub fn export_excel(
+        &self,
+        request: crate::excel::ExportRequest,
+    ) -> Result<crate::excel::ExcelFile> {
+        let (reply, wait) = mpsc::sync_channel(1);
+        self.sender
+            .send(Task::Excel(request, reply))
             .map_err(|_| DomainError::storage("Database worker stopped."))?;
         wait.recv()
             .map_err(|_| DomainError::storage("Database worker stopped."))?

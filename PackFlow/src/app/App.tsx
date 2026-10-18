@@ -1,4 +1,10 @@
 import { WorkspaceSafety } from '../features/LocalAccount';
+import {
+  ExcelExportButton,
+  ExcelFilters,
+  type ExportRequest,
+  type ExportPage,
+} from '../features/ExcelExport';
 import { useEffect, useState } from 'react';
 import { isTauri } from '@tauri-apps/api/core';
 import {
@@ -141,6 +147,14 @@ type Modal =
   | { kind: 'new' }
   | { kind: 'stage'; stageId: string };
 export function App() {
+  const [exportFilters, setExportFilters] = useState<ExportRequest | null>(null);
+  return (
+    <ExcelFilters.Provider value={setExportFilters}>
+      <Workspace exportFilters={exportFilters} />
+    </ExcelFilters.Provider>
+  );
+}
+function Workspace({ exportFilters }: { exportFilters: ExportRequest | null }) {
   const bootstrap = useBootstrap();
   const orders = useOrders();
   const [page, setPage] = useState('dashboard');
@@ -246,6 +260,15 @@ export function App() {
             <strong>{navigation.find((n) => n[0] === page)?.[1]}</strong>
           </div>
           <div className="top-actions">
+            <ExcelExportButton
+              key={page}
+              disabled={!data}
+              request={
+                exportFilters?.page === page
+                  ? exportFilters
+                  : { page: page as ExportPage, search: page === 'orders' ? search : '' }
+              }
+            />
             <span className="local-badge">
               {isTauri() ? 'Offline desktop' : 'Development preview'}
             </span>

@@ -3,6 +3,10 @@
 use packflow_core::{DbWorker, DomainError, Mutation, Query};
 use std::{env, io::Read, path::PathBuf};
 use tiny_http::{Header, Method, Response, Server};
+enum Output {
+    Json(serde_json::Value),
+    Excel(packflow_core::excel::ExcelFile),
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let root = PathBuf::from(env::var("PACKFLOW_DATA_DIR").unwrap_or_else(|_| ".dev-data".into()));
@@ -25,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             .iter()
             .find(|h| h.field.equiv("Cookie"))
             .map(|h| h.value.as_str().to_string());
-        let result = (|| -> Result<serde_json::Value, DomainError> {
+        let result = (|| -> Result<Output, DomainError> {
             // No permissive CORS. Browser requests must use the local Vite proxy.
             if req.method() != &Method::Post {
                 return Err(DomainError::validation("method", "POST required."));
@@ -53,16 +57,21 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             if req.url() == "/api/auth" {
                 let request = serde_json::from_str::<packflow_core::preview_auth::Request>(&body)?;
                 if test_bypass && matches!(request, packflow_core::preview_auth::Request::Status) {
-                    return Ok(
+                    return Ok(Output::Json(
                         serde_json::json!({"configured":true,"unlocked":true,"display_name":"Test fixture","test_bypass":true}),
-                    );
+                    ));
                 }
                 let (value, cookie) = account.handle(request, cookie.as_deref())?;
                 set_cookie = cookie;
-                return Ok(value);
+                return Ok(Output::Json(value));
             }
             if !test_bypass {
                 account.authorize(cookie.as_deref())?;
+            }
+            if req.url() == "/api/export" {
+                return worker
+                    .export_excel(serde_json::from_str(&body)?)
+                    .map(Output::Excel);
             }
             match req.url() {
                 "/api/query" => worker.query(serde_json::from_str::<Query>(&body)?),
@@ -78,21 +87,44 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     "Unknown development endpoint.",
                 )),
             }
+            .map(Output::Json)
         })();
-        let (status, body) = match result {
-            Ok(value) => (200, value.to_string()),
+        let (status, body, mime, filename) = match result {
+            Ok(Output::Json(value)) => (
+                200,
+                value.to_string().into_bytes(),
+                "application/json",
+                None,
+            ),
+            Ok(Output::Excel(file)) => (
+                200,
+                file.bytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                Some(file.filename),
+            ),
             Err(error) => (
                 if error.code == "UNAUTHENTICATED" {
                     401
                 } else {
                     400
                 },
-                serde_json::to_string(&error)?,
+                serde_json::to_vec(&error)?,
+                "application/json",
+                None,
             ),
         };
-        let mut response = Response::from_string(body)
+        let mut response = Response::from_data(body)
             .with_status_code(status)
-            .with_header(Header::from_bytes("Content-Type", "application/json").unwrap());
+            .with_header(Header::from_bytes("Content-Type", mime).unwrap());
+        if let Some(filename) = filename {
+            response.add_header(
+                Header::from_bytes(
+                    "Content-Disposition",
+                    format!("attachment; filename=\"{filename}\""),
+                )
+                .unwrap(),
+            );
+        }
         response.add_header(Header::from_bytes("Cache-Control", "no-store").unwrap());
         if let Some(cookie) = set_cookie {
             response.add_header(Header::from_bytes("Set-Cookie", cookie).unwrap());

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useExcelFilters } from './ExcelExport';
 import { useOrderPage, useReports } from '../data/hooks';
 import { ListSearch, Pagination } from '../components/Pagination';
 import { money } from '../contracts/money';
@@ -146,6 +147,7 @@ export function Reports({ today, onPick }: { today: string; onPick: (id: string)
   const [from, setFrom] = useState(`${today.slice(0, 8)}01`);
   const [to, setTo] = useState(today);
   const [performanceSearch, setPerformanceSearch] = useState('');
+  useExcelFilters({ page: 'reports', from_date: from, to_date: to, search: performanceSearch });
   const [performancePage, setPerformancePage] = useState(1);
   const [performancePageSize, setPerformancePageSize] = useState(25);
   const performance = useOrderPage(

@@ -10,6 +10,7 @@ test('real preview account: setup, protected API, remember, logout and recovery'
   );
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Create your account' })).toBeVisible();
+  expect((await page.request.post('/api/export', { data: { page: 'orders' } })).status()).toBe(401);
   expect((await page.request.post('/api/query', { data: { kind: 'bootstrap' } })).status()).toBe(
     401,
   );

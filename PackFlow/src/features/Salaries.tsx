@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useExcelFilters } from './ExcelExport';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,6 +12,7 @@ import { Dialog, Empty, ErrorNotice } from '../components/Dialog';
 
 export function Salaries({ actor, today }: { actor: string; today: string }) {
   const [month, setMonth] = useState(today.slice(0, 7));
+  useExcelFilters({ page: 'workers', month });
   const [archived, setArchived] = useState(false);
   const [editing, setEditing] = useState<SalaryRecord | null | undefined>(undefined);
   const query = useSalaries(month);

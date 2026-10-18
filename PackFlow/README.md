@@ -147,3 +147,6 @@ The local browser preview now asks for account setup/login and shows a Log out b
 The automated business-flow fixture may skip authentication only in a debug preview process explicitly configured with `PACKFLOW_TEST_NO_AUTH=1` and `/test-data` as its disposable data directory. The normal `/data` preview does not accept this bypass. The separate `preview-auth.spec.ts` test exercises real login and API rejection with authentication enabled on a fresh isolated server.
 
 For the optional seed script after preview account creation, supply `PACKFLOW_PREVIEW_USERNAME` and `PACKFLOW_PREVIEW_PASSWORD` in that shell's environment. The script signs in locally before writing; do not commit those values to a file. A new sign-in replaces the previous preview session, so the browser may ask you to sign in again afterward.
+
+
+Excel export (0.3.1): use **Export Excel** on any data page. See [Excel export details](docs/EXCEL_EXPORT.md) for worksheets, pagination, financial precision and date/month scope. Existing Mac test installations keep their account and records when updating.

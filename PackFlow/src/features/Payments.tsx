@@ -1,4 +1,5 @@
 import { Correction } from './Correction';
+import { useExcelFilters } from './ExcelExport';
 import { useState } from 'react';
 import { ArrowRight, Plus } from 'lucide-react';
 import type { OrderDetail, OrderSummary } from '../contracts';
@@ -41,6 +42,7 @@ export function Payments({
 }) {
   const detail = useOrder(selected);
   const [balanceSearch, setBalanceSearch] = useState('');
+  useExcelFilters({ page: 'payments', search: balanceSearch });
   const [balancePage, setBalancePage] = useState(1);
   const [balancePageSize, setBalancePageSize] = useState(25);
   const balances = useOrderPage(balanceSearch, balancePage, balancePageSize, 'active');
