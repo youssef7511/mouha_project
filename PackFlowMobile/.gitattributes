@@ -1,0 +1,2 @@
+# Schema fingerprint covers exact bytes in all builds.
+crates/mobile-core/src/schema.sql -text whitespace=cr-at-eol

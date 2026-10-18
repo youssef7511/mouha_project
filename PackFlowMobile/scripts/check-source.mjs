@@ -1,0 +1,10 @@
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+const root = fileURLToPath(new URL('../', import.meta.url));
+const tracked = execFileSync('git', ['-C', root, 'ls-files', '-z', '--', '.'], { encoding: 'utf8' }).split('\0').filter(Boolean);
+const forbidden = tracked.filter((p) => /(^|\/)(\.dev-data|backups|test-results|node_modules|target|dist)(\/|$)|\.(sqlite(?:-wal|-shm)?|db|pfbackup|pfmobile|xlsx?|p12|mobileprovision|key|pem)$/i.test(p) || /(^|\/)\.env($|\.)/.test(p) && !p.endsWith('.env.example'));
+if (forbidden.length) throw new Error(`Private/generated files tracked: ${forbidden.join(', ')}`);
+const config = JSON.parse(readFileSync(new URL('../src-tauri/tauri.conf.json', import.meta.url), 'utf8'));
+if (config.identifier !== 'com.packflow.mobile' || config.bundle?.resources) throw new Error('Mobile packaging must use its own identity and contain no runtime data resources.');
+console.log('Mobile source guard passed.');

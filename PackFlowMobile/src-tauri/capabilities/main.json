@@ -1,0 +1,1 @@
+{"$schema":"../gen/schemas/desktop-schema.json","identifier":"main","description":"Local mobile window can call only the typed device workspace commands.","windows":["main"],"permissions":["core:default","allow-mobile-query","allow-mobile-mutate","allow-mobile-backup","allow-mobile-restore"]}

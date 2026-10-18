@@ -1,0 +1,68 @@
+name: PackFlow Mobile checks and iOS simulator
+on:
+  push:
+    branches: [main]
+    paths: ['PackFlowMobile/**', '.github/workflows/build-mobile.yml']
+  pull_request:
+    paths: ['PackFlowMobile/**', '.github/workflows/build-mobile.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: PackFlowMobile
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: PackFlowMobile/package-lock.json
+      - run: npm ci
+      - run: node scripts/check-source.mjs
+      - run: npm run build && npm test && npm run format:check
+      - run: cargo fmt --all --check && cargo test --locked -p packflow-mobile-core --features preview && cargo clippy --locked -p packflow-mobile-core --features preview -- -D warnings
+      - run: npx playwright install --with-deps chromium
+      - run: |
+          cargo build --locked -p packflow-mobile-core --features preview --bin mobile-preview
+          PACKFLOW_MOBILE_DATA="$RUNNER_TEMP/mobile-e2e" PACKFLOW_MOBILE_BIND=127.0.0.1:4329 target/debug/mobile-preview > "$RUNNER_TEMP/mobile-core.log" 2>&1 &
+          for attempt in {1..30}; do
+            if curl -fsS -X POST -H 'Content-Type: application/json' --data '{"kind":"snapshot"}' http://127.0.0.1:4329/api/query; then break; fi
+            sleep 1
+          done
+          npm run test:browser
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        if: always()
+        with:
+          name: PackFlow-Mobile-browser-checks
+          path: PackFlowMobile/test-results
+          retention-days: 7
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: PackFlowMobile
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: PackFlowMobile/package-lock.json
+      - run: node scripts/check-source.mjs
+      - run: bash scripts/ios-simulator.sh
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        if: always()
+        with:
+          name: PackFlow-Mobile-iOS-Simulator
+          path: PackFlowMobile/artifacts
+          retention-days: 14
+          if-no-files-found: warn
